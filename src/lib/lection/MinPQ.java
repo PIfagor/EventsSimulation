@@ -7,7 +7,7 @@ public class MinPQ<Key extends Comparable<Key>> {
 	private Key[] pq;
 	private int n;
 	private Comparator<Key> comparator;
-	private static int DEFAULT_CAPACITY = 100;
+	private static int DEFAULT_CAPACITY = 100000;
 	
 	
 	public MinPQ()

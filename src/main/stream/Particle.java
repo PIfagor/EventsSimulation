@@ -132,7 +132,7 @@ public class Particle {
 	}
 
 	public void setColor(int rr, int gg, int bb) {
-		color= new Color(rr,gg,bb);
+		color = new Color(rr%255,gg%255,bb%255);
 		
 	}
 }
