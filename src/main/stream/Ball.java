@@ -7,10 +7,14 @@ public class Ball {
 	private double vx, vy; // velocity
 	private final double radius; // radius
 
-	public Ball() {
-		/* initialize position and velocity */
+	public Ball(int delta) {
+		radius = 10;
+		rx = 100+delta;
+		ry = 100+delta;
+		vx = 1;
+		vy = 5;
 	}
-
+	
 	public void move(double dt) {
 		if ((rx + vx * dt < radius) || (rx + vx * dt > 1.0 - radius)) {
 			vx = -vx;
