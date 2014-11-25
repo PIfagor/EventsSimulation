@@ -1,62 +1,84 @@
 package main.stream;
 
+
+
 import java.awt.Color;
 
 import lib.lection.MinPQ;
 import lib.princeton.StdDraw;
 
+
+
 public class CollisionSystem {
+	
+	private double limit = 10000;
+
+	class Event implements Comparable<Event> {
+		private double time; // time of event
+		private Particle a, b; // particles involved in event
+		private int countA, countB; // collision counts for a and b
+
+		public Event(double t, Particle a, Particle b) {
+			time = t;
+			this.a = a;
+			this.b = b;
+			
+			if (a != null) countA = a.count();
+            else           countA = -1;
+            if (b != null) countB = b.count();
+            else           countB = -1;
+
+		}
+
+		public int compareTo(Event that) {
+			return Double.compare(this.time, that.time);
+		}
+
+		public boolean isValid() {
+			if (a != null && a.count() != countA) return false;
+            if (b != null && b.count() != countB) return false;
+            return true;
+		}
+	}
+
 	private MinPQ<Event> pq; // the priority queue
 	private double t = 0.0; // simulation clock time
 	private Particle[] particles; // the array of particles
-	private int N = 0;
-	 private double hz = 0.5;        // number of redraw events per clock tick
-	 
+
 	public CollisionSystem(Particle[] particles) {
-		 this.particles = particles.clone();   // defensive copy
+		this.particles = particles;
 	}
 
-	private void predict(Particle a)
-	{
-		predict(a, 10000);
-	}
-	private void predict(Particle a,double limit) {
+	private void predict(Particle a) {
 		if (a == null)
 			return;
-		for (int i = 0; i < N; i++) {
+		for (int i = 0; i < particles.length; i++) {
 			double dt = a.timeToHit(particles[i]);
-			if (t + dt <= limit)
-                pq.insert(new Event(t + dt, a, particles[i]));
-			//pq.insert(new Event(t + dt, a, particles[i]));
+			if (t + dt < limit)
+				pq.insert(new Event(t + dt, a, particles[i]));
 		}
-		 // particle-wall collisions
-        double dtX = a.timeToHitVerticalWall();
-        double dtY = a.timeToHitHorizontalWall();
-        if (t + dtX <= limit) pq.insert(new Event(t + dtX, a, null));
-        if (t + dtY <= limit) pq.insert(new Event(t + dtY, null, a));
+		double dtx = a.timeToHitVerticalWall();
+		double dty = a.timeToHitHorizontalWall();
+		if (t + dtx < limit)
+			pq.insert(new Event(t + dtx, a, null));
+		
+		if (t + dty < limit)
+			pq.insert(new Event(t + dty, null, a));
 	}
 
-	private void redraw ()
-	{
-		redraw(10000);
+	private void redraw() {
+		StdDraw.clear();
+		
+		for (int i = 0; i < particles.length; ++i) {
+			particles[i].draw();
+		}
+		StdDraw.show(50);
+		if (t < limit) {
+            pq.insert(new Event(t + 1.0 / 0.5, null, null));
+        }
 	}
-	private void redraw(double limit) {
-		 StdDraw.clear();
-	        for (int i = 0; i < particles.length; i++) {
-	            particles[i].draw();
-	        }
-	        StdDraw.show(20);
-	        if (t < limit) {
-	            pq.insert(new Event(t + 1.0 / hz, null, null));
-	        }
-	}
-	
-	public void simulate()
-	{
-		simulate(100000);
-	}
-	
-	public void simulate(double limit) {
+
+	public void simulate() {
 		pq = new MinPQ<Event>();
 		for (int i = 0; i < particles.length; i++)
 			predict(particles[i]);
@@ -94,35 +116,39 @@ public class CollisionSystem {
 			predict(a);
 			predict(b);
 		}
+
 	}
-
-	private class Event implements Comparable<Event> {
-		private double time; // time of event
-		private Particle a, b; // particles involved in event
-		private int countA, countB; // collision counts for a and b
-
-		public Event(double t, Particle a, Particle b) {
-			this.time = t;
-            this.a    = a;
-            this.b    = b;
-            if (a != null) countA = a.count();
-            else           countA = -1;
-            if (b != null) countB = b.count();
-            else           countB = -1;
-		}
-
-		public int compareTo(Event that) {
-			if      (this.time < that.time) return -1;
-            else if (this.time > that.time) return +1;
-            else                            return  0;
-		}
-
-		public boolean isValid() {
-			if (a != null && a.count() != countA) return false;
-            if (b != null && b.count() != countB) return false;
-            return true;
-		}
+	
+	public static void main(String[] args) {
+		
+//		StdDraw.setXscale(0, 1);
+//	    StdDraw.setYscale(0, 1);
+		StdDraw.setXscale(1.0/22.0, 21.0/22.0);
+        StdDraw.setYscale(1.0/22.0, 21.0/22.0);
+	    StdDraw.show(0);
+		int N = 100;
+		Particle[] balls = new Particle[N];
+		for (int i = 0; i < N; i++)
+			balls[i] = new Particle();
+		CollisionSystem s = new CollisionSystem(balls);
+		
+		s.simulate();
+		//while (true) {
+			
+			
+			
+//			try {
+//				Thread.sleep(100);
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			StdDraw.clear();
+//			for (int i = 0; i < N; i++) {
+//				balls[i].move(0.5);
+//				balls[i].draw();
+//			}
+//			StdDraw.show(50);
+		//}
 	}
-
-
 }
